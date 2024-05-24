@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// generic remove from slice function
 func remove[T any](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
 }
 
+// suming slice of strings (for left arguments)
 func sumArgs(slice []string, start int) string {
 	var output string
 	slice = slice[start:]
@@ -26,11 +28,13 @@ var (
 )
 
 func main() {
+	// there has to be some options
 	if len(os.Args) == 1 {
 		fmt.Println("no option provided...")
 		return
 	}
 
+	// open, read and parse tasks.json file
 	tasksRaw, err := os.ReadFile("tasks.json")
 	if os.IsNotExist(err) {
 		os.Create("tasks.json")
@@ -43,24 +47,31 @@ func main() {
 		}
 	}
 
+	// parsing commands
 	command := strings.ToLower(os.Args[1])
 	if command == "add" {
-		if len(os.Args) < 2 {
+		// there has to be at least three argumets
+		if len(os.Args) <= 2 {
 			fmt.Println("provide task name")
 			return
 		}
+		// sum extra arguments, they are task name
 		name := sumArgs(os.Args, 2)
 		name = strings.ReplaceAll(name, "\n", "")
-		tasks = append(tasks, name)
+		tasks = append(tasks, name) // append new task
 	} else if command == "list" {
+		// for loop, print tasks
+		// ([index]) [name]
 		for i, task := range tasks {
 			fmt.Printf("(%d) %v\n", i, task)
 		}
 	} else if command == "remove" {
-		if len(os.Args) < 2 {
+		// there has to be at least three arguments
+		if len(os.Args) <= 2 {
 			fmt.Println("provide task index")
 			return
 		}
+		// get index name
 		indexStr := os.Args[2]
 		index, err := strconv.Atoi(indexStr)
 		if err != nil {
@@ -68,14 +79,17 @@ func main() {
 		}
 		tasks = remove(tasks, index)
 	} else if command == "clear" {
+		// clear tasks
 		tasks = []string{}
 	}
 
+	// parse tasks back to json
 	tasksRaw, err = json.MarshalIndent(tasks, "", " ")
 	if err != nil {
 		panic(err)
 	}
 
+	// write parsed json to file
 	err = os.WriteFile("tasks.json", tasksRaw, 0664)
 	if err != nil {
 		panic(err)
