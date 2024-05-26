@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // generic remove from slice function
@@ -30,7 +32,11 @@ var (
 func main() {
 	// there has to be some options
 	if len(os.Args) == 1 {
-		fmt.Println("no option provided...")
+		color.Red("no option provided, displaying help")
+		color.Blue("add [text]... - add task")
+		color.Blue("remove [index] - remove task by index")
+		color.Blue("clear [none] - clear tasks")
+		color.Blue("list [none] - list tasks")
 		return
 	}
 
@@ -52,7 +58,7 @@ func main() {
 	if command == "add" {
 		// there has to be at least three argumets
 		if len(os.Args) <= 2 {
-			fmt.Println("provide task name")
+			color.RedString("provide task name")
 			return
 		}
 		// sum extra arguments, they are task name
@@ -63,12 +69,12 @@ func main() {
 		// for loop, print tasks
 		// ([index]) [name]
 		for i, task := range tasks {
-			fmt.Printf("(%d) %v\n", i, task)
+			fmt.Printf(color.GreenString("(%d)")+color.YellowString(" %v\n"), i, task)
 		}
 	} else if command == "remove" {
 		// there has to be at least three arguments
 		if len(os.Args) <= 2 {
-			fmt.Println("provide task index")
+			color.Red("provide task index")
 			return
 		}
 		// get index name
