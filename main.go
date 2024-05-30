@@ -74,7 +74,8 @@ func main() {
 
 	// parsing commands
 	command := strings.ToLower(os.Args[1])
-	if command == "add" {
+	switch command {
+	case "add":
 		// there has to be at least three argumets
 		if len(os.Args) <= 2 {
 			color.RedString("provide task name")
@@ -84,13 +85,13 @@ func main() {
 		name := sumArgs(os.Args, 2)
 		name = strings.ReplaceAll(name, "\n", "")
 		tasks = append(tasks, name) // append new task
-	} else if command == "list" {
+	case "list":
 		// for loop, print tasks
 		// ([index]) [name]
 		for i, task := range tasks {
 			fmt.Printf(color.GreenString("(%d)")+color.YellowString(" %v\n"), i, task)
 		}
-	} else if command == "remove" {
+	case "remove":
 		// there has to be at least three arguments
 		if len(os.Args) <= 2 {
 			color.Red("provide task index")
@@ -103,9 +104,10 @@ func main() {
 			panic(err)
 		}
 		tasks = remove(tasks, index)
-	} else if command == "clear" {
+	case "clear":
 		// clear tasks
 		tasks = []string{}
+	default:
 	}
 
 	saveTasks()
