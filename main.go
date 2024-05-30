@@ -33,19 +33,18 @@ func loadTasks() error {
 	// open, read and parse tasks.json file
 	tasksRaw, err := os.ReadFile("tasks.json")
 	if os.IsNotExist(err) {
-		os.Create("tasks.json")
+		return err
 	} else if err != nil {
 		panic(err)
-	} else {
-		err = json.Unmarshal(tasksRaw, &tasks)
-		if err != nil {
-			panic(err)
-		}
+	}
+	err = json.Unmarshal(tasksRaw, &tasks)
+	if err != nil {
+		panic(err)
 	}
 	return nil
 }
 
-func saveTasks() {
+func saveTasks(tasks []string) {
 	// parse tasks back to json
 	tasksRaw, err := json.MarshalIndent(tasks, "", " ")
 	if err != nil {
@@ -59,23 +58,31 @@ func saveTasks() {
 	}
 }
 
+func help() {
+	color.Blue("init [none] - initialize tasker in this directory")
+	color.Blue("add [text]... - add task")
+	color.Blue("remove [index] - remove task by index")
+	color.Blue("clear [none] - clear tasks")
+	color.Blue("list [none] - list tasks")
+}
+
 func main() {
 	// there has to be some options
 	if len(os.Args) == 1 {
-		color.Red("no option provided, displaying help")
-		color.Blue("add [text]... - add task")
-		color.Blue("remove [index] - remove task by index")
-		color.Blue("clear [none] - clear tasks")
-		color.Blue("list [none] - list tasks")
+		color.Red("no arguments specified")
+		help()
 		return
 	}
-
-	loadTasks()
 
 	// parsing commands
 	command := strings.ToLower(os.Args[1])
 	switch command {
+	case "init":
+		saveTasks([]string{})
+	case "help":
+		help()
 	case "add":
+		loadTasks()
 		// there has to be at least three argumets
 		if len(os.Args) <= 2 {
 			color.RedString("provide task name")
@@ -85,13 +92,16 @@ func main() {
 		name := sumArgs(os.Args, 2)
 		name = strings.ReplaceAll(name, "\n", "")
 		tasks = append(tasks, name) // append new task
+		saveTasks(tasks)
 	case "list":
+		loadTasks()
 		// for loop, print tasks
 		// ([index]) [name]
 		for i, task := range tasks {
 			fmt.Printf(color.GreenString("(%d)")+color.YellowString(" %v\n"), i, task)
 		}
 	case "remove":
+		loadTasks()
 		// there has to be at least three arguments
 		if len(os.Args) <= 2 {
 			color.Red("provide task index")
@@ -104,11 +114,12 @@ func main() {
 			panic(err)
 		}
 		tasks = remove(tasks, index)
+		saveTasks(tasks)
 	case "clear":
 		// clear tasks
-		tasks = []string{}
+		saveTasks([]string{})
 	default:
+		color.Red("command not found")
+		help()
 	}
-
-	saveTasks()
 }
