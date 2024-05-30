@@ -10,6 +10,10 @@ import (
 	"github.com/fatih/color"
 )
 
+var (
+	tasks = []string{}
+)
+
 // generic remove from slice function
 func remove[T any](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
@@ -25,21 +29,7 @@ func sumArgs(slice []string, start int) string {
 	return output
 }
 
-var (
-	tasks = []string{}
-)
-
-func main() {
-	// there has to be some options
-	if len(os.Args) == 1 {
-		color.Red("no option provided, displaying help")
-		color.Blue("add [text]... - add task")
-		color.Blue("remove [index] - remove task by index")
-		color.Blue("clear [none] - clear tasks")
-		color.Blue("list [none] - list tasks")
-		return
-	}
-
+func loadTasks() error {
 	// open, read and parse tasks.json file
 	tasksRaw, err := os.ReadFile("tasks.json")
 	if os.IsNotExist(err) {
@@ -52,6 +42,35 @@ func main() {
 			panic(err)
 		}
 	}
+	return nil
+}
+
+func saveTasks() {
+	// parse tasks back to json
+	tasksRaw, err := json.MarshalIndent(tasks, "", " ")
+	if err != nil {
+		panic(err)
+	}
+
+	// write parsed json to file
+	err = os.WriteFile("tasks.json", tasksRaw, 0664)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func main() {
+	// there has to be some options
+	if len(os.Args) == 1 {
+		color.Red("no option provided, displaying help")
+		color.Blue("add [text]... - add task")
+		color.Blue("remove [index] - remove task by index")
+		color.Blue("clear [none] - clear tasks")
+		color.Blue("list [none] - list tasks")
+		return
+	}
+
+	loadTasks()
 
 	// parsing commands
 	command := strings.ToLower(os.Args[1])
@@ -89,15 +108,5 @@ func main() {
 		tasks = []string{}
 	}
 
-	// parse tasks back to json
-	tasksRaw, err = json.MarshalIndent(tasks, "", " ")
-	if err != nil {
-		panic(err)
-	}
-
-	// write parsed json to file
-	err = os.WriteFile("tasks.json", tasksRaw, 0664)
-	if err != nil {
-		panic(err)
-	}
+	saveTasks()
 }
