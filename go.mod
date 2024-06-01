@@ -1,4 +1,4 @@
-module tasker
+module github.com/marekor555/tasker
 
 go 1.22.3
 
